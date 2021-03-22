@@ -1,7 +1,7 @@
 use std::{marker::PhantomData};
 
 use super::boxplot::{BoxplotOrient, BoxplotOrientH, BoxplotOrientV};
-use crate::element::{Drawable, PointCollection};
+use crate::{element::{Drawable, PointCollection}, style::RGBAColor};
 use crate::style::{Color, ShapeStyle, BLACK};
 use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
@@ -334,9 +334,6 @@ impl<K, DB: DrawingBackend, O: BoxplotOrient<K, f32>> Drawable<DB> for BoxplotOu
             let bottom_right = (corner1.0.max(corner2.0), corner1.1.max(corner2.1));
             backend.draw_rect(upper_left, bottom_right, &self.style, false)?;
 
-            // |---[   |  ]----|
-            // ________^________
-            backend.draw_line(start_bar(points[2]), end_bar(points[2]), &self.style)?;
 
             // |---[   |  ]----|
             // ____________^^^^_
@@ -349,6 +346,12 @@ impl<K, DB: DrawingBackend, O: BoxplotOrient<K, f32>> Drawable<DB> for BoxplotOu
                 end_whisker(points[4]),
                 &self.style,
             )?;
+
+            // |---[   |  ]----|
+            // ________^________
+            let mut median_style = self.style.clone();
+            median_style.color = RGBAColor(255, 127, 0, 1.0);
+            backend.draw_line(start_bar(points[2]), end_bar(points[2]), &median_style)?;
 
             // o  o o |---[   |  ]----|   oo o 
             // ^__^_^_____________________^^_^
